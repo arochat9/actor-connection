@@ -89,6 +89,7 @@ export default function ActorSearch({ label, onSelectActor, selectedActor }: Act
           onChange={handleInputChange}
           onFocus={() => inputValue.length >= 2 && setShowSuggestions(true)}
           placeholder="Start typing actor name..."
+          autoComplete="off"
         />
         {showSuggestions && filteredActors.length > 0 && (
           <div ref={suggestionRef} className="suggestionList">
