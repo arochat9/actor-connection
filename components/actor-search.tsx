@@ -1,15 +1,10 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useRef, useEffect } from "react"
-import { useQuery } from "@tanstack/react-query"
 import type { Osdk } from "@osdk/client"
 import type { Actor } from "@service-user-for-actor-apps/sdk"
-
-interface ActorsResponse {
-  actors: Osdk.Instance<Actor>[]
-}
+import { useActors, useFilteredActors } from "@/hooks/useActors"
 
 interface ActorSearchProps {
   label: string
@@ -24,24 +19,11 @@ export default function ActorSearch({ label, onSelectActor, selectedActor }: Act
   const inputRef = useRef<HTMLInputElement>(null)
   const suggestionRef = useRef<HTMLDivElement>(null)
 
-  // Load all actors once
-  const { data: allActors = [] } = useQuery({
-    queryKey: ["actors"],
-    queryFn: async () => {
-      const response = await fetch(`/api/actors/search`)
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status}`)
-      }
-
-      const data = await response.json() as ActorsResponse
-      return data.actors
-    },
-  })
-
-  // Filter actors client-side based on input
-  const filteredActors = allActors.filter(actor => 
-    actor.actorName?.toLowerCase().includes(inputValue.toLowerCase()) ?? false
-  )
+  // Load all actors using our custom hook
+  const { data: allActors = [] } = useActors()
+  
+  // Get filtered actors based on input
+  const { filteredActors } = useFilteredActors(inputValue, allActors)
 
   // Handle outside clicks to close suggestions
   useEffect(() => {

@@ -1,8 +1,8 @@
 export default function Footer() {
   return (
-    <footer className="footer">
+    <footer className="footer w-full">
       <div className="footerContent">
-        <p>Powered by the OSDK</p>
+        <p>Powered by the Foundry OSDK</p>
       </div>
     </footer>
   )
