@@ -15,4 +15,5 @@ The Foundry backend can be divided into 4 parts, data generation, data storage, 
 - Data generation occurs in a transform which calls a function in a docker image to scrape IMDB / wikipedia.
 - Data is stored in the Foundry ontology via 2 object types, Movies and Actors.
 - The link actors query is a Typescript function that uses a many to many relationship between actor and movies to calculate minimum distance.
-- Finally, all data querying is facilitated by a generated OSDK, which has a restricted scope to Actor, Movie, and linkActors. All authentication goes through the generated Foundry service user
+- Finally, all data querying is facilitated by a generated OSDK, which has a restricted scope to Actor, Movie, and linkActors. All authentication goes through the generated Foundry service user.
+
