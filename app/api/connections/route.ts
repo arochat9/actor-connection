@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
-import type { CharacterConnection } from "@/lib/types"
+import { linkActors } from "@service-user-for-actor-apps/sdk";
+import { client } from "../../../lib/client";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -11,16 +12,12 @@ export async function GET(request: Request) {
   }
 
   try {
-    // Call your actual linkActors endpoint
-    // Replace the URL with your actual API endpoint
-    const response = await fetch(`${process.env.API_BASE_URL}/linkActors?actor1=${actor1Id}&actor2=${actor2Id}`)
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch connections")
-    }
-
-    const connections: CharacterConnection[] = await response.json()
-    return NextResponse.json(connections)
+    const result = await client(linkActors).executeFunction({
+      actor1: actor1Id,
+      actor2: actor2Id
+    });
+    result.push(result[result.length - 1])
+    return NextResponse.json(result);
   } catch (error) {
     console.error("Error finding connections:", error)
     return NextResponse.json({ error: "Failed to find connections between actors" }, { status: 500 })

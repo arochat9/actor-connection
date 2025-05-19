@@ -4,11 +4,12 @@ import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import ActorSearch from "@/components/actor-search"
 import ConnectionResults from "@/components/connection-results"
-import type { Actor, CharacterConnection } from "@/lib/types"
+import type { Actor, linkActors } from "@service-user-for-actor-apps/sdk"
+import type { Osdk } from "@osdk/client"
 
 export default function ActorConnection() {
-  const [selectedActor1, setSelectedActor1] = useState<Actor | null>(null)
-  const [selectedActor2, setSelectedActor2] = useState<Actor | null>(null)
+  const [selectedActor1, setSelectedActor1] = useState<Osdk.Instance<Actor> | null>(null)
+  const [selectedActor2, setSelectedActor2] = useState<Osdk.Instance<Actor> | null>(null)
   const [isSearching, setIsSearching] = useState(false)
 
   const {
@@ -16,14 +17,14 @@ export default function ActorConnection() {
     isLoading,
     error,
     refetch,
-  } = useQuery<CharacterConnection[]>({
-    queryKey: ["connections", selectedActor1?.id, selectedActor2?.id],
+  } = useQuery<linkActors.ReturnType>({
+    queryKey: ["connections", selectedActor1?.$primaryKey, selectedActor2?.$primaryKey],
     queryFn: async () => {
       if (!selectedActor1 || !selectedActor2) {
         return []
       }
 
-      const response = await fetch(`/api/connections?actor1=${selectedActor1.id}&actor2=${selectedActor2.id}`)
+      const response = await fetch(`/api/connections?actor1=${selectedActor1.$primaryKey}&actor2=${selectedActor2.$primaryKey}`)
       if (!response.ok) {
         throw new Error("Failed to find connections")
       }

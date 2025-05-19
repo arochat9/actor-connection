@@ -1,0 +1,8 @@
+# Actor degrees of seperation
+
+TODO
+- upgrade connection results to add the last element a second time to the end of the list
+- fix the formatting, for some reason everything is shifted to the left
+- pull the API calls out into their own files
+- somehow make it all work on mobile
+- push to git and then deploy to vercel!

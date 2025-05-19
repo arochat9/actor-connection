@@ -4,12 +4,17 @@ import type React from "react"
 
 import { useState, useRef, useEffect } from "react"
 import { useQuery } from "@tanstack/react-query"
-import type { Actor } from "@/lib/types"
+import type { Osdk } from "@osdk/client"
+import type { Actor } from "@service-user-for-actor-apps/sdk"
+
+interface ActorsResponse {
+  actors: Osdk.Instance<Actor>[]
+}
 
 interface ActorSearchProps {
   label: string
-  onSelectActor: (actor: Actor | null) => void
-  selectedActor: Actor | null
+  onSelectActor: (actor: Osdk.Instance<Actor> | null) => void
+  selectedActor: Osdk.Instance<Actor> | null
 }
 
 export default function ActorSearch({ label, onSelectActor, selectedActor }: ActorSearchProps) {
@@ -19,21 +24,24 @@ export default function ActorSearch({ label, onSelectActor, selectedActor }: Act
   const inputRef = useRef<HTMLInputElement>(null)
   const suggestionRef = useRef<HTMLDivElement>(null)
 
-  // Search for actors based on input
-  const { data: filteredActors = [] } = useQuery({
-    queryKey: ["actors", inputValue],
+  // Load all actors once
+  const { data: allActors = [] } = useQuery({
+    queryKey: ["actors"],
     queryFn: async () => {
-      if (!inputValue || inputValue.length < 2) return []
-
-      const response = await fetch(`/api/actors/search?query=${encodeURIComponent(inputValue)}`)
+      const response = await fetch(`/api/actors/search`)
       if (!response.ok) {
-        throw new Error("Failed to search actors")
+        throw new Error(`Error: ${response.status}`)
       }
 
-      return response.json()
+      const data = await response.json() as ActorsResponse
+      return data.actors
     },
-    enabled: inputValue.length >= 2,
   })
+
+  // Filter actors client-side based on input
+  const filteredActors = allActors.filter(actor => 
+    actor.actorName?.toLowerCase().includes(inputValue.toLowerCase()) ?? false
+  )
 
   // Handle outside clicks to close suggestions
   useEffect(() => {
@@ -56,8 +64,8 @@ export default function ActorSearch({ label, onSelectActor, selectedActor }: Act
 
   // Set input value when selected actor changes
   useEffect(() => {
-    if (selectedActor) {
-      setInputValue(selectedActor.name)
+    if (selectedActor?.actorName) {
+      setInputValue(selectedActor.actorName)
     }
   }, [selectedActor])
 
@@ -71,14 +79,16 @@ export default function ActorSearch({ label, onSelectActor, selectedActor }: Act
       setShowSuggestions(false)
     }
 
-    if (selectedActor && value !== selectedActor.name) {
+    if (selectedActor?.actorName && value !== selectedActor.actorName) {
       onSelectActor(null)
     }
   }
 
-  const selectActor = (actor: Actor) => {
+  const selectActor = (actor: Osdk.Instance<Actor>) => {
     onSelectActor(actor)
-    setInputValue(actor.name)
+    if (actor.actorName) {
+      setInputValue(actor.actorName)
+    }
     setShowSuggestions(false)
   }
 
@@ -101,8 +111,8 @@ export default function ActorSearch({ label, onSelectActor, selectedActor }: Act
         {showSuggestions && filteredActors.length > 0 && (
           <div ref={suggestionRef} className="suggestionList">
             {filteredActors.map((actor) => (
-              <div key={actor.id} className="suggestionItem" onMouseDown={() => selectActor(actor)}>
-                {actor.name}
+              <div key={actor.$primaryKey} className="suggestionItem" onMouseDown={() => selectActor(actor)}>
+                {actor.actorName ?? 'Unnamed Actor'}
               </div>
             ))}
           </div>

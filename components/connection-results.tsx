@@ -1,8 +1,8 @@
 import Image from "next/image"
-import type { CharacterConnection } from "@/lib/types"
+import type { linkActors } from "@service-user-for-actor-apps/sdk"
 
 interface ConnectionResultsProps {
-  connections: CharacterConnection[]
+  connections: linkActors.ReturnType
   isLoading: boolean
   error: string | null
 }
@@ -23,6 +23,7 @@ export default function ConnectionResults({ connections, isLoading, error }: Con
   if (!connections || connections.length === 0) {
     return null
   }
+  console.log("connections info: " + connections[0].actor_name);
 
   return (
     <div className="resultsContainer">
